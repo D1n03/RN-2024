@@ -5,20 +5,20 @@ import re
 # EX 1
 def parse_equation(equation):
     equation = equation.replace(" ", "")
-    x_coefficient, y_coefficient, z_coefficient = 0, 0, 0
+    x_coefficient, y_coefficient, z_coefficient = 0.0, 0.0, 0.0
 
-    x_match = re.search(r'([+-]?\d*)x', equation)
-    y_match = re.search(r'([+-]?\d*)y', equation)
-    z_match = re.search(r'([+-]?\d*)z', equation)
-    constant_match = re.search(r'=\s*([+-]?\d+)', equation)
+    x_match = re.search(r'([+-]?\d*\.?\d*)x', equation)
+    y_match = re.search(r'([+-]?\d*\.?\d*)y', equation)
+    z_match = re.search(r'([+-]?\d*\.?\d*)z', equation)
+    constant_match = re.search(r'=\s*([+-]?\d*\.?\d+)', equation)
 
     def parse_coefficient(match):
         if not match or match.group(1) == '':
-            return 1
+            return 1.0
         elif match.group(1) == '+' or match.group(1) == '-':
-            return int(match.group(1) + '1')
+            return float(match.group(1) + '1')
         else:
-            return int(match.group(1))
+            return float(match.group(1))
 
     if x_match:
         x_coefficient = parse_coefficient(x_match)
@@ -29,7 +29,7 @@ def parse_equation(equation):
 
     if not constant_match:
         raise ValueError(f"Cannot parse equation: {equation}")
-    constant = int(constant_match.group(1))
+    constant = float(constant_match.group(1))
 
     return [x_coefficient, y_coefficient, z_coefficient], constant
 
@@ -53,13 +53,13 @@ def determinant(matrix):
         a21, a22 = matrix[1]
         return a11 * a22 - a12 * a21
 
-    elif len(matrix) == 3 and len(matrix[0]) == 3:
-        a11, a12, a13 = matrix[0]
-        a21, a22, a23 = matrix[1]
-        a31, a32, a33 = matrix[2]
-        return (a11 * (a22 * a33 - a23 * a32) -
-                a12 * (a21 * a33 - a23 * a31) +
-                a13 * (a21 * a32 - a22 * a31))
+
+    elif len(matrix) == 3:
+        return (
+                matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1]) -
+                matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0]) +
+                matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0])
+        )
 
     else:
         raise ValueError("Determinant can only be calculated for 2x2 or 3x3 matrices.")
