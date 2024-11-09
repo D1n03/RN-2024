@@ -40,6 +40,10 @@ def sigmoid_derive(x):
     return value * (1 - value)
 
 
+def cross_entropy_loss(predictions, targets):
+    return -np.sum(targets * np.log(predictions + 1e-10)) / targets.shape[0]  # Add epsilon for numerical stability
+
+
 def softmax(x):
     exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))  # Improve stability with softmax
     return exp_x / np.sum(exp_x, axis=1, keepdims=True)
@@ -70,12 +74,12 @@ class Network:
         active_hidden = np.tile(active_hidden, (x.shape[0], 1))
 
         # Forward pass
-        self.z1 = np.dot(x, self.w1) + self.b1 # Linear combination for hidden layer
-        self.a1 = sigmoid(self.z1) # Activation function (sigmoid) for hidden layer
-        self.a1 *= active_hidden  # Apply dropout by zeroing out inactive nodes
+        # self.z1 = np.dot(x, self.w1) + self.b1 # Linear combination for hidden layer
+        # self.a1 = sigmoid(self.z1) # Activation function (sigmoid) for hidden layer
+        # self.a1 *= active_hidden  # Apply dropout by zeroing out inactive nodes
 
-        self.z2 = np.dot(self.a1, self.w2) + self.b2 # Linear combination for output layer
-        self.a2 = softmax(self.z2) # Activation function (softmax) for output layer
+        # self.z2 = np.dot(self.a1, self.w2) + self.b2 # Linear combination for output layer
+        # self.a2 = softmax(self.z2) # Activation function (softmax) for output layer
 
         # Backward pass for output layer
         delta2 = y - self.a2 # Error at output layer (difference between true and predicted)
@@ -99,11 +103,23 @@ class Network:
             # Shuffle data at each epoch
             permutation = np.random.permutation(x.shape[0])
             x_shuffled, y_shuffled = x[permutation], y[permutation]
+            epoch_loss = 0
 
             for i in range(0, x.shape[0], batch_size):
                 batch_x = x_shuffled[i:i + batch_size]
                 batch_y = y_shuffled[i:i + batch_size]
+                predictions = self.forward(batch_x)
                 self.backpropagation(batch_x, batch_y, p_on)
+
+                # Forward pass for loss calculation on batch
+                batch_loss = cross_entropy_loss(predictions, batch_y)
+                epoch_loss += batch_loss * batch_x.shape[0]  # Accumulate weighted by batch size
+
+            # Calculate average loss for the epoch
+            epoch_loss /= x.shape[0]
+            train_accuracy = self.accuracy(x, y)
+            print(f"Loss: {epoch_loss:.4f}, Accuracy: {train_accuracy * 100:.2f}%")
+
 
     def accuracy(self, x, y):
         predictions = self.forward(x)
