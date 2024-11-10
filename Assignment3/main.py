@@ -3,7 +3,7 @@ from torchvision.datasets import MNIST
 import time
 
 LR = 0.02
-EPOCHS = 20
+EPOCHS = 50
 BATCH_SIZE = 100
 HIDDEN_NODES = 100
 INPUT_DIM = 784
@@ -74,12 +74,12 @@ class Network:
         active_hidden = np.tile(active_hidden, (x.shape[0], 1))
 
         # Forward pass
-        # self.z1 = np.dot(x, self.w1) + self.b1 # Linear combination for hidden layer
-        # self.a1 = sigmoid(self.z1) # Activation function (sigmoid) for hidden layer
-        # self.a1 *= active_hidden  # Apply dropout by zeroing out inactive nodes
+        self.z1 = np.dot(x, self.w1) + self.b1 # Linear combination for hidden layer
+        self.a1 = sigmoid(self.z1) # Activation function (sigmoid) for hidden layer
+        self.a1 *= active_hidden  # Apply dropout by zeroing out inactive nodes
 
-        # self.z2 = np.dot(self.a1, self.w2) + self.b2 # Linear combination for output layer
-        # self.a2 = softmax(self.z2) # Activation function (softmax) for output layer
+        self.z2 = np.dot(self.a1, self.w2) + self.b2 # Linear combination for output layer
+        self.a2 = softmax(self.z2) # Activation function (softmax) for output layer
 
         # Backward pass for output layer
         delta2 = y - self.a2 # Error at output layer (difference between true and predicted)
